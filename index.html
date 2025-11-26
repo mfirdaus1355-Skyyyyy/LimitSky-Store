@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LimitSky Gaming Store — Demo E-Commerce</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#0a0f18; --card:#0f1624; --muted:#aebacb; --accent:#4da6ff; --primary:#1e40af;
+    --glass: rgba(255,255,255,0.03);
+  }
+  [data-theme="light"]{
+    --bg:#f6f8fb; --card:#ffffff; --muted:#445569; --accent:#0b63ff; --primary:#0b63ff; --glass: rgba(0,0,0,0.03);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; font-family:"Poppins",sans-serif;
+    background:var(--bg); color: #e6edf3;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Header */
+  header{
+    background: linear-gradient(135deg,#08101c,#0a2342,#1e3a8a);
+    padding:28px 20px; text-align:center;
+    box-shadow:0 6px 30px rgba(0,0,0,0.5);
+  }
+  header h1{margin:0;font-size:32px;color:var(--accent);letter-spacing:1px}
+  header p{margin:6px 0 0;color:var(--muted);font-weight:500}
+
+  /* Nav */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 22px;background:var(--card);position:sticky;top:0;z-index:40;
+    box-shadow:0 3px 18px rgba(0,0,0,0.45);
+  }
+  .logo{font-weight:700;color:var(--accent);font-size:20px}
+  .menu{display:flex;gap:18px;align-items:center}
+  .menu a{color:inherit;text-decoration:none;font-weight:600;padding-bottom:6px;position:relative}
+  .menu a::after{content:"";height:2px;background:var(--accent);position:absolute;left:0;bottom:0;width:0;transition:0.25s}
+  .menu a:hover::after{width:100%}
+  .nav-actions{display:flex;gap:10px;align-items:center}
+
+  .btn{
+    background:var(--primary);color:#fff;padding:9px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 18px rgba(30,64,175,0.18);
+  }
+  .btn.ghost{background:transparent;border:2px solid rgba(255,255,255,0.06);color:var(--muted);font-weight:600}
+
+  /* Layout */
+  .container{max-width:1150px;margin:0 auto;padding:26px}
+
+  /* Hero */
+  .hero{
+    height:480px;background:
+      linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.6)),
+      url('https://images.unsplash.com/photo-1511512578047-dfb367046420') center/cover no-repeat;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;color:var(--accent);
+  }
+  .hero h2{font-size:44px;margin:0 0 8px}
+  .hero p{color:var(--muted);margin:0 0 16px;font-size:16px}
+  .hero .cta{display:flex;gap:12px;align-items:center}
+
+  /* Filters / Categories */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+  .chip{background:var(--glass);padding:8px 12px;border-radius:999px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.03)}
+  .chip.active{background:linear-gradient(90deg,rgba(77,166,255,0.12),rgba(30,64,175,0.08));border-color:var(--accent);color:var(--accent)}
+
+  /* Grid produk */
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+  }
+  .card{
+    background:var(--card);border-radius:12px;padding:14px;border-bottom:4px solid rgba(30,64,175,0.12);
+    transition:transform .28s,box-shadow .28s;
+  }
+  .card:hover{transform:translateY(-8px);box-shadow:0 14px 35px rgba(0,0,0,0.6)}
+  .card img{width:100%;height:160px;object-fit:cover;border-radius:10px}
+  .card h3{color:var(--accent);margin:10px 0 6px;font-size:18px}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  .price{font-weight:800;color:#56b5ff;margin-top:10px}
+  .card-actions{display:flex;gap:8px;margin-top:12px;align-items:center}
+  .small{font-size:13px;padding:8px 10px;border-radius:9px;background:transparent;border:1px solid rgba(255,255,255,0.05);cursor:pointer}
+
+  /* Promo */
+  .promo{background:linear-gradient(90deg,#112240,#1e3a8a);padding:30px;border-radius:12px;color:white;margin:26px 0;text-align:center}
+
+  /* Brands */
+  .brands{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;align-items:center;padding:18px 0}
+  .brands img{width:110px;opacity:.8;filter:grayscale(0.2)}
+
+  /* Why us */
+  .why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:18px}
+  .why{background:var(--card);padding:18px;border-radius:12px;text-align:center}
+  .why h4{color:var(--accent);margin-bottom:8px}
+
+  /* Contact */
+  .contact-card{max-width:700px;margin:10px auto;background:var(--card);padding:18px;border-radius:12px}
+
+  /* Cart popup */
+  #cartPopup{
+    position:fixed;top:0;right:-420px;width:380px;height:100%;background:var(--card);z-index:1200;padding:20px;box-shadow:-8px 0 40px rgba(0,0,0,0.6);transition:.35s;
+  }
+  #cartPopup.show{right:0}
+  .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .cart-items{max-height:58vh;overflow:auto;padding-right:6px}
+  .cart-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;background:var(--glass);margin-bottom:10px}
+  .cart-item img{width:64px;height:48px;object-fit:cover;border-radius:8px}
+  .cart-item .meta{flex:1}
+  .cart-item .meta b{display:block;color:var(--accent)}
+  .qty{display:flex;gap:8px;align-items:center}
+  .qty button{padding:6px 8px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);cursor:pointer}
+  .remove{background:#ef4444;color:white;border:none;padding:6px 8px;border-radius:8px;cursor:pointer}
+
+  .cart-footer{position:absolute;bottom:20px;left:20px;right:20px}
+
+  /* Modals */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1500}
+  .modal-backdrop.show{display:flex}
+  .modal{width:100%;max-width:720px;background:var(--card);padding:18px;border-radius:12px}
+
+  /* Top button */
+  #topBtn{position:fixed;right:18px;bottom:18px;background:var(--primary);color:#fff;padding:12px;border-radius:50%;cursor:pointer;display:none;z-index:1000}
+
+  /* Footer */
+  footer{padding:18px;text-align:center;background:linear-gradient(180deg,#000814,#050721);color:var(--accent);margin-top:30px}
+
+  /* Responsive tweaks */
+  @media(max-width:820px){
+    .hero h2{font-size:32px}
+    nav .menu{display:none}
+  }
+
+  /* Light theme adjustments for text contrast */
+  [data-theme="light"] header{box-shadow:0 6px 20px rgba(0,0,0,0.05)}
+  [data-theme="light"] .card{border-bottom:4px solid rgba(11,99,255,0.08)}
+  [data-theme="light"] .promo{color:#fff}
+  [data-theme="light"] .modal{box-shadow:0 8px 30px rgba(0,0,0,0.06)}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- NAV -->
+<nav>
+  <div class="logo">LimitSky Gaming</div>
+  <div class="menu" id="mainMenu">
+    <a href="#home">Home</a>
+    <a href="#produk">Products</a>
+    <a href="#brands">Brands</a>
+    <a href="#why">Why Us</a>
+    <a href="#promo">Promo</a>
+    <a href="#kontak">Contact</a>
+  </div>
+
+  <div class="nav-actions">
+    <button class="small" id="themeToggle" title="Toggle theme">🌓</button>
+    <button class="small" onclick="openLogin()">Login</button>
+    <button class="btn" onclick="toggleCart()">🛒 Cart (<span id="cartCount">0</span>)</button>
+    <button class="small" onclick="openAdmin()">Admin</button>
+  </div>
+</nav>
+
+<!-- HEADER / HERO -->
+<header class="hero" id="home">
+  <div class="container">
+    <h2>THE FUTURE OF GAMING</h2>
+    <p>LimitSky Gaming Store — Premium gear untuk pemain kompetitif</p>
+    <div class="cta">
+      <button class="btn" onclick="document.getElementById('produk').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+      <button class="small" onclick="openLogin()">Member Area</button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="container" style="padding-top:22px">
+
+  <!-- Filters -->
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+    <div>
+      <strong style="color:var(--accent)">Kategori:</strong>
+      <div class="filters" id="categoryFilters">
+        <span class="chip active" data-cat="all">All</span>
+        <span class="chip" data-cat="keyboard">Keyboard</span>
+        <span class="chip" data-cat="mouse">Mouse</span>
+        <span class="chip" data-cat="headset">Headset</span>
+        <span class="chip" data-cat="pc">PC / Laptop</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center">
+      <input id="searchBox" placeholder="Cari produk..." style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit" />
+      <button class="small" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  <!-- Produk Grid -->
+  <section id="produk" style="margin-top:16px">
+    <h3 style="color:var(--accent);margin-bottom:12px">Best Gaming Products</h3>
+
+    <div class="grid" id="productGrid">
+      <!-- Produk akan dimasukkan lewat JS / initial seeded items -->
+    </div>
+  </section>
+
+  <!-- Promo -->
+  <section id="promo" class="promo" style="margin-top:26px">
+    <h3>🔥 Promo Special Bulan Ini — Diskon hingga 40% untuk item terpilih!</h3>
+    <p>Gratis ongkir untuk pembelian di atas Rp 2.500.000 • Garansi resmi 1 tahun</p>
+  </section>
+
+  <!-- Brands -->
+  <section id="brands">
+    <h4 style="color:var(--accent);text-align:center">Trusted By Top Brands</h4>
+    <div class="brands">
+      <img alt="Logitech" src="https://www.google.com/imgres?q=logitech%20logo&imgurl=https%3A%2F%2Fimages.cults3d.com%2F-yAODnBYpGJeVDsOL61JbF6mVI0%3D%2F516x516%2Ffilters%3Ano_upscale()%2Fhttps%3A%2F%2Ffbi.cults3d.com%2Fuploaders%2F29408799%2Fillustration-file%2F047bf629-0745-4b1d-9341-6f76a596810d%2FEkran-Resmi-2023-11-11-22.55.26.png&imgrefurl=https%3A%2F%2Fcults3d.com%2Fen%2F3d-model%2Ftool%2Flogitech-logo-tancelik%3Fsrsltid%3DAfmBOor_ysghVgovy0KaiNcYDmKBEwZW8UdC5hvh0Ilcc7XRa6i4E8bE&docid=7cBTGkWQ3_clvM&tbnid=XKpg9cUU03QrPM&vet=12ahUKEwjp4cPOw4-RAxWdxzgGHXCWGkMQM3oECCMQAA..i&w=516&h=516&hcb=2&ved=2ahUKEwjp4cPOw4-RAxWdxzgGHXCWGkMQM3oECCMQAA">
+      <img alt="Razer" src="https://www.google.com/imgres?q=logo%20razer&imgurl=https%3A%2F%2Flogos-world.net%2Fwp-content%2Fuploads%2F2020%2F11%2FRazer-Symbol.jpg&imgrefurl=https%3A%2F%2Ftranslate.google.com%2Ftranslate%3Fu%3Dhttps%3A%2F%2Flogos-world.net%2Frazer-logo%2F%26hl%3Did%26sl%3Den%26tl%3Did%26client%3Dimgs&docid=oITSTJhmGx7wsM&tbnid=8bimdw0E0G6LpM&vet=12ahUKEwjnmObmw4-RAxUEyDgGHfoFD8AQM3oECB0QAA..i&w=3840&h=2160&hcb=2&ved=2ahUKEwjnmObmw4-RAxUEyDgGHfoFD8AQM3oECB0QAA">
+      <img alt="Asus" src="https://www.google.com/imgres?q=logo%20asus&imgurl=https%3A%2F%2Fpress.asus.com%2Fassets%2Fw_767%2Ch_431%2Ffa3cbcd7-e826-45f9-885e-1d3470be3952%2F20220801101712676.jpg&imgrefurl=https%3A%2F%2Fpress.asus.com%2Fmedia%2Fcorporate-assets%2F2%2Falbums%2F47%2F&docid=WZekCx874K0DCM&tbnid=9QeHmdJvJROE4M&vet=12ahUKEwiRmYmOxI-RAxUj4TgGHVXkCcsQM3oECBkQAA..i&w=767&h=431&hcb=2&ved=2ahUKEwiRmYmOxI-RAxUj4TgGHVXkCcsQM3oECBkQAA">
+      <img alt="MSI" src="https://www.google.com/imgres?q=logo%20msi&imgurl=https%3A%2F%2Fexotekno.com%2Fwp-content%2Fuploads%2F2017%2F09%2FMSI-logo.png&imgrefurl=https%3A%2F%2Fexotekno.com%2Fdaftar-harga-motherboard-msi-intel-lga-1151%2F368%2Fmsi-logo%2F&docid=ttVpcT6KTBqsNM&tbnid=e_B1azdl6VHRrM&vet=12ahUKEwi_gLOZxI-RAxXizzgGHU-RNu4QM3oECBoQAA..i&w=600&h=315&hcb=2&ved=2ahUKEwi_gLOZxI-RAxXizzgGHU-RNu4QM3oECBoQAA">
+    </div>
+  </section>
+
+  <!-- Why Us -->
+  <section id="why" style="margin-top:22px">
+    <h3 style="color:var(--accent);text-align:center">Why Choose LimitSky?</h3>
+    <div class="why-grid" style="margin-top:14px">
+      <div class="why"><h4>⚡ High Performance</h4><p>Komponen & gear kualitas tinggi untuk performa kompetitif.</p></div>
+      <div class="why"><h4>💼 Warranty</h4><p>Garansi resmi & layanan purna jual.</p></div>
+      <div class="why"><h4>🚚 Fast Delivery</h4><p>Pengiriman cepat ke seluruh Indonesia.</p></div>
+      <div class="why"><h4>🔧 Support</h4><p>Dukungan teknis & konsultasi konfigurasi gratis.</p></div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="kontak" style="margin-top:32px">
+    <h3 style="color:var(--accent);text-align:center">Contact Us</h3>
+    <div class="contact-card">
+      <form id="contactForm" onsubmit="event.preventDefault(); alert('Terima kasih! Pesan terkirim (demo).')">
+        <input placeholder="Nama" required style="width:100%;padding:12px;border-radius:8px;margin-bottom:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit">
+        <input placeholder="Email" type="email" required style="width:100%;padding:12px;border-radius:8px;margin-bottom:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit">
+        <textarea placeholder="Pesan" rows="5" style="width:100%;padding:12px;border-radius:8px;margin-bottom:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit"></textarea>
+        <button class="btn" type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div style="display:flex;justify-content:center;gap:18px;align-items:center;flex-wrap:wrap">
+    <span>© 2025 Keinzo Gaming Store</span>
+    <span style="opacity:.8">•</span>
+    <a href="#" style="color:inherit;text-decoration:none">Privacy</a>
+    <a href="#" style="color:inherit;text-decoration:none">Terms</a>
+  </div>
+</footer>
+
+<!-- CART POPUP -->
+<div id="cartPopup" aria-hidden="true">
+  <div class="cart-header">
+    <div><strong style="color:var(--accent)">Your Cart</strong><div style="font-size:12px;color:var(--muted)">Items in cart</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="small" onclick="clearCart()">Clear</button>
+      <button class="small" onclick="toggleCart()">✖</button>
+    </div>
+  </div>
+
+  <div class="cart-items" id="cartItems"></div>
+
+  <div style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>Total</b><b id="cartTotal">Rp 0</b></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="checkoutBtn" onclick="checkoutWhatsApp()">Checkout via WhatsApp</button>
+      <button class="small" onclick="saveCart()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modals: Login/Register/Admin/Product Detail -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalContent" role="dialog" aria-modal="true"></div>
+</div>
+
+<!-- Top button -->
+<button id="topBtn" title="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* =========================
+   Data & State Management
+   ========================= */
+const seedProducts = [
+  {id:'kb-01',cat:'keyboard',title:'RGB Mechanical Keyboard',desc:'Mechanical switches, full RGB, anti-ghosting',price:650000,img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8'},
+  {id:'ms-01',cat:'mouse',title:'Gaming Mouse 7200 DPI',desc:'7 buttons, high-precision sensor, RGB',price:230000,img:'https://images.unsplash.com/photo-1618365908648-e71bd8d0f6f2'},
+  {id:'hs-01',cat:'headset',title:'Headset 7.1 Surround',desc:'Bass boost, mic noise-cancelling',price:480000,img:'https://images.unsplash.com/photo-1612083470697-ab7fa540de7f'},
+  {id:'pc-01',cat:'pc',title:'Custom Gaming PC',desc:'RTX GPU, liquid cooling, RGB case',price:12500000,img:'https://images.unsplash.com/photo-1587202372775-e229f172b8f9'},
+  {id:'lt-01',cat:'pc',title:'Gaming Laptop 144Hz',desc:'144Hz panel, i7/Ryzen 7 options',price:8500000,img:'https://images.unsplash.com/photo-1555617117-08ac3d69f4f9'}
+];
+
+let products = JSON.parse(localStorage.getItem('kg_products')) || seedProducts;
+let cart = JSON.parse(localStorage.getItem('kg_cart')) || [];
+let user = JSON.parse(localStorage.getItem('kg_user')) || null;
+
+/* =========================
+   Utilities
+   ========================= */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const formatRp = n => 'Rp ' + (n||0).toLocaleString('id-ID');
+
+/* =========================
+   Theme toggle
+   ========================= */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(theme){
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('kg_theme', theme);
+}
+const storedTheme = localStorage.getItem('kg_theme') || 'dark';
+applyTheme(storedTheme);
+themeToggle.addEventListener('click', ()=>{
+  const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(t);
+});
+
+/* =========================
+   Render Products
+   ========================= */
+const grid = document.getElementById('productGrid');
+function renderProducts(list){
+  grid.innerHTML = '';
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.title}">
+      <h3>${p.title}</h3>
+      <p>${p.desc}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="price">${formatRp(p.price)}</div>
+        <div style="display:flex;gap:8px" class="card-actions">
+          <button class="small" onclick="openProduct('${p.id}')">Detail</button>
+          <button class="btn" onclick="addToCart('${p.id}')">Add to Cart</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+renderProducts(products);
+
+/* =========================
+   Filters & Search
+   ========================= */
+const chips = document.getElementById('categoryFilters');
+chips.addEventListener('click', e=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  chips.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  applyFilter();
+});
+$('#searchBox').addEventListener('input', applyFilter);
+function resetFilters(){
+  $$('.chip').forEach(c=>c.classList.remove('active'));
+  $$('.chip')[0].classList.add('active');
+  $('#searchBox').value = '';
+  applyFilter();
+}
+function applyFilter(){
+  const cat = $$('.chip').find(c=>c.classList.contains('active')).dataset.cat;
+  const q = $('#searchBox').value.trim().toLowerCase();
+  const filtered = products.filter(p=>{
+    return (cat === 'all' || p.cat === cat) &&
+      (p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+  });
+  renderProducts(filtered);
+}
+
+/* =========================
+   Cart Logic
+   ========================= */
+const cartPopup = $('#cartPopup');
+const cartItemsDiv = $('#cartItems');
+const cartCountSpan = $('#cartCount');
+const cartTotalSpan = $('#cartTotal');
+
+function saveCart(){
+  localStorage.setItem('kg_cart', JSON.stringify(cart));
+  alert('Cart disimpan (localStorage).');
+}
+function toggleCart(){
+  cartPopup.classList.toggle('show');
+  renderCart();
+}
+function addToCart(productId){
+  const p = products.find(x=>x.id===productId);
+  if(!p) return;
+  const found = cart.find(i=>i.id===productId);
+  if(found) found.qty++;
+  else cart.push({id:p.id,title:p.title,price:p.price,img:p.img,qty:1});
+  updateCartState();
+  // visual cue
+  toggleCart();
+  setTimeout(()=>toggleCart(),800);
+}
+function updateCartState(){
+  localStorage.setItem('kg_cart', JSON.stringify(cart));
+  cartCountSpan.textContent = cart.reduce((s,i)=>s+i.qty,0);
+  renderCart();
+}
+function renderCart(){
+  cartItemsDiv.innerHTML = '';
+  let total = 0;
+  if(cart.length === 0){
+    cartItemsDiv.innerHTML = '<div style="padding:12px;color:var(--muted)">Cart kosong — tambahkan produk</div>';
+  } else {
+    cart.forEach((it, idx)=>{
+      total += it.price * it.qty;
+      const el = document.createElement('div');
+      el.className = 'cart-item';
+      el.innerHTML = `
+        <img src="${it.img}" alt="${it.title}">
+        <div class="meta">
+          <b>${it.title}</b>
+          <div style="color:var(--muted);font-size:13px">${formatRp(it.price)} x ${it.qty} = <strong>${formatRp(it.price*it.qty)}</strong></div>
+          <div class="qty" style="margin-top:8px">
+            <button onclick="changeQty(${idx}, -1)">−</button>
+            <div style="min-width:28px;text-align:center">${it.qty}</div>
+            <button onclick="changeQty(${idx}, 1)">+</button>
+            <button class="remove" style="margin-left:8px" onclick="removeItem(${idx})">Hapus</button>
+          </div>
+        </div>
+      `;
+      cartItemsDiv.appendChild(el);
+    });
+  }
+  cartTotalSpan.textContent = formatRp(total);
+  cartCountSpan.textContent = cart.reduce((s,i)=>s+i.qty,0);
+}
+function changeQty(index, delta){
+  if(!cart[index]) return;
+  cart[index].qty += delta;
+  if(cart[index].qty < 1) cart[index].qty = 1;
+  updateCartState();
+}
+function removeItem(index){
+  if(!cart[index]) return;
+  cart.splice(index,1);
+  updateCartState();
+}
+function clearCart(){
+  if(!confirm('Kosongkan keranjang?')) return;
+  cart = [];
+  updateCartState();
+}
+
+/* =========================
+   Checkout via WhatsApp
+   ========================= */
+function checkoutWhatsApp(){
+  if(cart.length === 0){ alert('Keranjang kosong!'); return; }
+  // format message
+  let txt = `Halo LimitSkyy Store%0ASaya mau order:%0A`;
+  cart.forEach(i=>{
+    txt += `- ${i.title} x${i.qty} (${formatRp(i.price)})%0A`;
+  });
+  const total = cart.reduce((s,i)=>s + i.price*i.qty,0);
+  txt += `%0ATotal: ${formatRp(total)}%0A`;
+  txt += `Nama:%0AAlamat:%0APembayaran:`;
+  // replace phone number with your WA number in international format without plus, e.g. 6281234567890
+  const waNumber = '6285960331571'; // <-- ganti dengan nomor WA toko
+  const url = `https://wa.me/${waNumber}?text=${txt}`;
+  window.open(url, '_blank');
+}
+
+/* =========================
+   Product Detail Modal
+   ========================= */
+const modalBackdrop = $('#modalBackdrop');
+const modalContent = $('#modalContent');
+function openModal(html){
+  modalContent.innerHTML = html;
+  modalBackdrop.classList.add('show');
+}
+function closeModal(){
+  modalBackdrop.classList.remove('show');
+}
+modalBackdrop.addEventListener('click', (e)=>{ if(e.target === modalBackdrop) closeModal(); });
+
+function openProduct(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  openModal(`
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:240px">
+        <img src="${p.img}" style="width:100%;border-radius:10px;height:300px;object-fit:cover">
+      </div>
+      <div style="flex:1;min-width:260px">
+        <h2 style="margin:0 0 6px;color:var(--accent)">${p.title}</h2>
+        <p style="color:var(--muted);margin:0 0 12px">${p.desc}</p>
+        <div style="font-weight:800;font-size:18px;margin-bottom:12px">${formatRp(p.price)}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="addToCart('${p.id}'); closeModal();">Add to cart</button>
+          <button class="small" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+/* =========================
+   Login / Register
+   ========================= */
+function openLogin(){
+  openModal(`
+    <h3 style="color:var(--accent)">Member Login / Register</h3>
+    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:280px">
+        <h4 style="margin-bottom:6px">Login</h4>
+        <input id="loginEmail" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+        <input id="loginPass" placeholder="Password" type="password" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+        <button class="btn" onclick="login()">Login</button>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <h4 style="margin-bottom:6px">Register</h4>
+        <input id="regName" placeholder="Nama" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+        <input id="regEmail" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+        <input id="regPass" placeholder="Password" type="password" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04)">
+        <button class="small" onclick="register()">Create Account</button>
+      </div>
+    </div>
+  `);
+}
+function login(){
+  const e = $('#loginEmail').value.trim();
+  const p = $('#loginPass').value;
+  if(!e || !p){ alert('Masukkan email & password'); return; }
+  // demo: store user locally
+  user = {email:e,name:e.split('@')[0]};
+  localStorage.setItem('kg_user', JSON.stringify(user));
+  alert('Login sukses (demo): ' + user.name);
+  closeModal();
+}
+function register(){
+  const name = $('#regName').value.trim();
+  const email = $('#regEmail').value.trim();
+  const pw = $('#regPass').value;
+  if(!name || !email || !pw){ alert('Lengkapi data pendaftaran'); return; }
+  user = {email, name};
+  localStorage.setItem('kg_user', JSON.stringify(user));
+  alert('Akun dibuat (demo): ' + name);
+  closeModal();
+}
+
+/* =========================
+   Admin Panel (static) - add product
+   ========================= */
+function openAdmin(){
+  openModal(`
+    <h3 style="color:var(--accent)">Admin Panel (Demo)</h3>
+    <p style="color:var(--muted)">Tambahkan produk baru (tersimpan di localStorage)</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <input id="apId" placeholder="ID unik" style="padding:8px;border-radius:8px;width:40%">
+      <input id="apTitle" placeholder="Judul produk" style="padding:8px;border-radius:8px;width:58%">
+      <input id="apCat" placeholder="Kategori (keyboard/mouse/headset/pc)" style="padding:8px;border-radius:8px;width:48%;margin-top:8px">
+      <input id="apPrice" placeholder="Harga (angka saja)" style="padding:8px;border-radius:8px;width:48%;margin-top:8px">
+      <input id="apImg" placeholder="URL gambar" style="padding:8px;border-radius:8px;width:100%;margin-top:8px">
+      <textarea id="apDesc" placeholder="Deskripsi singkat" style="width:100%;min-height:80px;padding:8px;border-radius:8px;margin-top:8px"></textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="adminAddProduct()">Tambah Produk</button>
+        <button class="small" onclick="adminReset()">Reset ke seeded</button>
+      </div>
+    </div>
+  `);
+}
+function adminAddProduct(){
+  const id = $('#apId').value.trim(); const title = $('#apTitle').value.trim();
+  const cat = $('#apCat').value.trim(); const price = parseInt($('#apPrice').value);
+  const img = $('#apImg').value.trim(); const desc = $('#apDesc').value.trim();
+  if(!id||!title||!cat||isNaN(price)){ alert('Isi ID, Judul, Kategori, Harga'); return; }
+  const newP = {id,cat,title,desc,price,img: img || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8'};
+  products.unshift(newP);
+  localStorage.setItem('kg_products', JSON.stringify(products));
+  renderProducts(products);
+  alert('Produk ditambahkan (localStorage).');
+  closeModal();
+}
+function adminReset(){
+  if(!confirm('Reset produk ke seed awal?')) return;
+  products = [...seedProducts];
+  localStorage.setItem('kg_products', JSON.stringify(products));
+  renderProducts(products);
+  alert('Reset selesai.');
+  closeModal();
+}
+
+/* =========================
+   Product persistence
+   ========================= */
+if(!localStorage.getItem('kg_products')){
+  localStorage.setItem('kg_products', JSON.stringify(products));
+}
+
+/* =========================
+   Product click events — delegated (for performance)
+   ========================= */
+document.addEventListener('click', (e)=>{
+  // future: event delegation
+});
+
+/* =========================
+   Init
+   ========================= */
+updateCartState();
+applyFilter();
+
+/* =========================
+   Top button & scroll reveal
+   ========================= */
+const topBtn = $('#topBtn');
+window.addEventListener('scroll', () => {
+  if(window.scrollY > 400) topBtn.style.display = 'block'; else topBtn.style.display = 'none';
+  // reveal
+  document.querySelectorAll('.card, #brands, #why, #promo, .contact-card').forEach(el=>{
+    const r = el.getBoundingClientRect();
+    if(r.top < window.innerHeight - 80) el.style.opacity = 1;
+  });
+});
+
+/* =========================
+   Accessibility small improvements
+   ========================= */
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeModal();
+});
+
+</script>
+</body>
+</html>
