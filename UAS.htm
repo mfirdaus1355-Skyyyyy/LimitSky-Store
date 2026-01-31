@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>NA Bouquet Store</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;font-family:Poppins}
+body{margin:0;background:#f4f6f8;color:#333}
+
+header{
+background:linear-gradient(135deg,#1f2933,#111827);
+color:white;
+padding:20px;
+text-align:center
+}
+nav{
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin-top:10px
+}
+nav button,select{
+padding:10px 18px;
+border:none;
+border-radius:25px;
+background:white;
+color:#111;
+font-weight:600;
+cursor:pointer
+}
+
+section{padding:20px}
+
+#products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px
+}
+
+.card{
+background:white;
+border-radius:18px;
+box-shadow:0 8px 20px rgba(0,0,0,.1);
+padding:12px;
+transition:.3s
+}
+.card:hover{transform:translateY(-5px)}
+.card img{
+width:100%;
+height:160px;
+object-fit:cover;
+border-radius:12px
+}
+
+.price{color:#16a34a;font-weight:bold}
+.star{color:gold;cursor:pointer;font-size:18px}
+
+#cart{
+position:fixed;
+right:-350px;
+top:0;
+width:300px;
+height:100%;
+background:white;
+transition:.4s;
+padding:15px;
+z-index:99;
+box-shadow:-5px 0 15px rgba(0,0,0,.2)
+}
+#cart.show{right:0}
+
+#modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:100
+}
+#modalBox{
+background:white;
+padding:20px;
+border-radius:15px;
+width:90%;
+max-width:400px
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:#1f2933;
+color:white
+}
+button:hover{opacity:.9}
+
+@media(max-width:600px){
+nav{flex-direction:column}
+}
+
+/* ===== TAMBAHAN ===== */
+.toast{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+color:white;
+padding:10px 18px;
+border-radius:20px;
+opacity:0;
+transition:.4s;
+z-index:999
+}
+.toast.show{opacity:1}
+
+#searchBox{
+margin:10px auto;
+display:block;
+padding:10px 16px;
+border-radius:20px;
+border:1px solid #ccc;
+width:80%;
+max-width:300px
+}
+
+.wish{color:red;cursor:pointer;font-size:20px}
+.fadeIn{animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🌸 NA Bouquet</h1>
+<p>Elegant Flower & Gift Store</p>
+<nav>
+<select id="catFilter">
+<option value="all">Semua</option>
+<option value="bouquet">Bouquet</option>
+<option value="gift">Gift Box</option>
+<option value="standing">Standing Flower</option>
+</select>
+<button onclick="toggleCart()">🛒 (<span id="cartCount">0</span>)</button>
+</nav>
+</header>
+
+<input id="searchBox" placeholder="Cari bouquet..." oninput="searchProduct()">
+
+<section id="home">
+<div id="products"></div>
+</section>
+
+<section id="detail" style="display:none"></section>
+
+<div id="cart">
+<h3>Keranjang</h3>
+<div id="cartItems"></div>
+<h4>Total: <span id="total"></span></h4>
+<button onclick="checkout()">Pesan via WhatsApp</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let products = [
+{id:1,name:"Rose Luxury Bouquet",price:250000,cat:"bouquet",img:"https://images.pexels.com/photos/931162/pexels-photo-931162.jpeg",rating:5},
+{id:2,name:"Tulip Elegant Bouquet",price:220000,cat:"bouquet",img:"https://images.pexels.com/photos/1420704/pexels-photo-1420704.jpeg",rating:4},
+{id:3,name:"Gift Box Love",price:300000,cat:"gift",img:"https://images.pexels.com/photos/64266/rose-explosion-flower-floral-love-64266.jpeg",rating:5},
+{id:4,name:"Standing Flower Wedding",price:750000,cat:"standing",img:"https://images.pexels.com/photos/1648377/pexels-photo-1648377.jpeg",rating:4},
+{id:5,name:"Sunflower Bouquet",price:180000,cat:"bouquet",img:"https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg",rating:4},
+{id:6,name:"Gift Box Premium",price:400000,cat:"gift",img:"https://images.pexels.com/photos/1132046/pexels-photo-1132046.jpeg",rating:5}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let wishlist=JSON.parse(localStorage.getItem("wish"))||[];
+
+const productsDiv = document.getElementById("products");
+const detailDiv = document.getElementById("detail");
+const cartDiv = document.getElementById("cartItems");
+const cartCount = document.getElementById("cartCount");
+const totalSpan = document.getElementById("total");
+
+function showToast(msg){
+let t=document.getElementById("toast");
+t.textContent=msg;
+t.classList.add("show");
+setTimeout(()=>t.classList.remove("show"),2000);
+}
+
+function renderProducts(){
+let cat = catFilter.value;
+let list = products.filter(p=>cat=="all"||p.cat==cat);
+productsDiv.innerHTML="";
+list.forEach(p=>{
+let stars="";
+for(let i=1;i<=5;i++){
+stars+=`<span class="star" onclick="rate(${p.id},${i})">${i<=p.rating?"★":"☆"}</span>`;
+}
+productsDiv.innerHTML+=`
+<div class="card fadeIn">
+<img src="${p.img}">
+<h3>${p.name}</h3>
+<div>${stars}</div>
+<p class="price">Rp ${p.price.toLocaleString()}</p>
+<button onclick="viewDetail(${p.id})">Detail</button>
+<button onclick="addCart(${p.id})">Tambah</button>
+</div>`;
+});
+attachWishlist();
+}
+
+function attachWishlist(){
+document.querySelectorAll(".card").forEach((c,i)=>{
+let id=products[i].id;
+let btn=document.createElement("span");
+btn.textContent=wishlist.includes(id)?"❤️":"🤍";
+btn.className="wish";
+btn.onclick=function(){
+if(wishlist.includes(id)){
+wishlist=wishlist.filter(x=>x!=id);
+btn.textContent="🤍";
+}else{
+wishlist.push(id);
+btn.textContent="❤️";
+}
+localStorage.setItem("wish",JSON.stringify(wishlist));
+showToast("Wishlist diperbarui");
+}
+c.querySelector("h3").appendChild(btn);
+});
+}
+
+function viewDetail(id){
+let p = products.find(x=>x.id==id);
+home.style.display="none";
+detailDiv.style.display="block";
+detailDiv.innerHTML=`
+<button onclick="backHome()">⬅ Kembali</button>
+<img src="${p.img}" style="width:100%;border-radius:15px">
+<h2>${p.name}</h2>
+<p>Harga: Rp ${p.price.toLocaleString()}</p>
+<p>Kategori: ${p.cat}</p>
+<button onclick="addCart(${p.id})">Tambah ke Keranjang</button>
+`;
+}
+
+function backHome(){
+detailDiv.style.display="none";
+home.style.display="block";
+}
+
+function addCart(id){
+let p = products.find(x=>x.id==id);
+let f = cart.find(x=>x.id==id);
+if(f)f.qty++; else cart.push({...p,qty:1});
+localStorage.setItem("cart",JSON.stringify(cart));
+renderCart();
+showToast("Masuk keranjang");
+}
+
+function renderCart(){
+cartDiv.innerHTML="";
+let total=0;
+cart.forEach((i,idx)=>{
+total+=i.price*i.qty;
+cartDiv.innerHTML+=`${i.name} x${i.qty} <button onclick="delCart(${idx})">❌</button><br>`;
+});
+cartDiv.innerHTML+=`<br><button onclick="clearCart()">Kosongkan</button>`;
+totalSpan.textContent="Rp "+total.toLocaleString();
+cartCount.textContent = cart.reduce((s,i)=>s+i.qty,0);
+}
+
+function delCart(i){
+cart.splice(i,1);
+localStorage.setItem("cart",JSON.stringify(cart));
+renderCart();
+}
+
+function clearCart(){
+cart=[];
+localStorage.removeItem("cart");
+renderCart();
+showToast("Keranjang dikosongkan");
+}
+
+function toggleCart(){
+cart.classList.toggle("show");
+}
+
+/* ===== FIX WA ===== */
+function checkout(){
+if(cart.length==0){
+showToast("Keranjang masih kosong");
+return;
+}
+
+let total=0;
+let msg="NA Bouquet Order\n";
+cart.forEach(i=>{
+total+=i.price*i.qty;
+msg+=`- ${i.name} x${i.qty}\n`;
+});
+msg+=`Total: Rp ${total.toLocaleString()}\n`;
+msg+="Terima kasih 🌸";
+
+let url="https://wa.me/6285960331571?text="+encodeURIComponent(msg);
+location.href=url;
+}
+
+function rate(id,val){
+let p = products.find(x=>x.id==id);
+p.rating=val;
+renderProducts();
+}
+
+function searchProduct(){
+let q=searchBox.value.toLowerCase();
+document.querySelectorAll(".card").forEach(c=>{
+let name=c.querySelector("h3").textContent.toLowerCase();
+c.style.display=name.includes(q)?"block":"none";
+});
+}
+
+catFilter.onchange=renderProducts;
+renderProducts();
+renderCart();
+</script>
+
+</body>
+</html>
